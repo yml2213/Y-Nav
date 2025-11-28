@@ -966,7 +966,7 @@ function App() {
                  title="Fork this project on GitHub"
                >
                  <GitFork size={14} />
-                 <span>Fork 项目</span>
+                 <span>Fork 项目 v1.0</span>
                </a>
             </div>
         </div>
