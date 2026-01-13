@@ -101,13 +101,13 @@ npm run dev
 
 | 键名 | 用途 |
 |------|------|
-| `cloudnav_data` | 链接和分类数据 |
-| `cloudnav_auth` | 认证令牌 |
-| `cloudnav_ai_config` | AI 配置 |
+| `cloudnav_data_cache_v2` | 链接和分类数据（版本2） |
+| `cloudnav_ai_config` | AI 配置（API Key、模型等） |
 | `cloudnav_search_config` | 搜索引擎配置 |
 | `cloudnav_webdav_config` | WebDAV 备份配置 |
-| `cloudnav_website_config` | 网站配置 |
-| `lastLoginTime` | 最后登录时间 |
+| `cloudnav_site_settings` | 网站配置（标题、主题色等） |
+| `cloudnav_favicon_cache` | 图标缓存（Base64 格式） |
+| `theme` | 主题模式（light/dark/system） |
 
 ### 清除本地数据
 

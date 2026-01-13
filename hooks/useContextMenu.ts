@@ -12,7 +12,6 @@ interface UseContextMenuProps {
     categories: Category[];
     updateData: (links: LinkItem[], categories: Category[]) => void;
     onEditLink: (link: LinkItem) => void;
-    onShowQRCode: (url: string, title: string) => void;
     isBatchEditMode: boolean;
 }
 
@@ -21,7 +20,6 @@ export function useContextMenu({
     categories,
     updateData,
     onEditLink,
-    onShowQRCode,
     isBatchEditMode
 }: UseContextMenuProps) {
     const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -56,21 +54,12 @@ export function useContextMenu({
         if (!contextMenu.link) return;
 
         navigator.clipboard.writeText(contextMenu.link.url)
-            .then(() => {
-                console.log('链接已复制到剪贴板');
-            })
             .catch(err => {
                 console.error('复制链接失败:', err);
             });
 
         closeContextMenu();
     }, [contextMenu.link, closeContextMenu]);
-
-    const showQRCode = useCallback(() => {
-        if (!contextMenu.link) return;
-        onShowQRCode(contextMenu.link.url, contextMenu.link.title);
-        closeContextMenu();
-    }, [contextMenu.link, onShowQRCode, closeContextMenu]);
 
     const editLinkFromContextMenu = useCallback(() => {
         if (!contextMenu.link) return;
@@ -139,7 +128,6 @@ export function useContextMenu({
         handleContextMenu,
         closeContextMenu,
         copyLinkToClipboard,
-        showQRCode,
         editLinkFromContextMenu,
         deleteLinkFromContextMenu,
         togglePinFromContextMenu,

@@ -14,17 +14,6 @@ export function useModals() {
     const [editingLink, setEditingLink] = useState<LinkItem | undefined>(undefined);
     const [prefillLink, setPrefillLink] = useState<Partial<LinkItem> | undefined>(undefined);
 
-    // QR Code Modal
-    const [qrCodeModal, setQrCodeModal] = useState<{
-        isOpen: boolean;
-        url: string;
-        title: string;
-    }>({
-        isOpen: false,
-        url: '',
-        title: ''
-    });
-
     // Open link modal for adding
     const openAddLinkModal = useCallback(() => {
         setEditingLink(undefined);
@@ -43,16 +32,6 @@ export function useModals() {
         setIsModalOpen(false);
         setEditingLink(undefined);
         setPrefillLink(undefined);
-    }, []);
-
-    // Open QR code modal
-    const openQRCodeModal = useCallback((url: string, title: string) => {
-        setQrCodeModal({ isOpen: true, url, title });
-    }, []);
-
-    // Close QR code modal
-    const closeQRCodeModal = useCallback(() => {
-        setQrCodeModal({ isOpen: false, url: '', title: '' });
     }, []);
 
     return {
@@ -95,11 +74,6 @@ export function useModals() {
         isSearchConfigModalOpen,
         setIsSearchConfigModalOpen,
         openSearchConfigModal: () => setIsSearchConfigModalOpen(true),
-        closeSearchConfigModal: () => setIsSearchConfigModalOpen(false),
-
-        // QR Code Modal
-        qrCodeModal,
-        openQRCodeModal,
-        closeQRCodeModal
+        closeSearchConfigModal: () => setIsSearchConfigModalOpen(false)
     };
 }

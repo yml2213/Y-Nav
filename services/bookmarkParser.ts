@@ -1,8 +1,12 @@
 import { LinkItem, Category } from '../types';
-import { v4 as uuidv4 } from 'uuid'; // Assuming uuid is available or we use a simple generator
 
-// Simple UUID generator fallback
+// Simple ID generator using crypto.randomUUID() for modern browsers
+// Fallback to timestamp-based ID for older environments
 const generateId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older browsers
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 

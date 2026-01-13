@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Copy, QrCode, Edit2, Trash2, Pin, CopyPlus, FolderInput, ChevronRight } from 'lucide-react';
+import { Copy, Edit2, Trash2, Pin, CopyPlus, FolderInput, ChevronRight } from 'lucide-react';
 import { Category } from '../types';
 
 interface ContextMenuProps {
@@ -8,7 +8,6 @@ interface ContextMenuProps {
   categories: Category[];
   onClose: () => void;
   onCopyLink: () => void;
-  onShowQRCode: () => void;
   onEditLink: () => void;
   onDuplicateLink: () => void;
   onMoveLink: (categoryId: string) => void;
@@ -22,7 +21,6 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
   categories,
   onClose,
   onCopyLink,
-  onShowQRCode,
   onEditLink,
   onDuplicateLink,
   onMoveLink,

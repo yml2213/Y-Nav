@@ -99,7 +99,7 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete
       cache[domain] = iconUrl;
       localStorage.setItem(FAVICON_CACHE_KEY, JSON.stringify(cache));
     } catch (error) {
-      console.log("Failed to cache custom icon", error);
+      // Failed to cache custom icon - silently ignore
     }
   };
 
@@ -201,7 +201,7 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete
           return;
         }
       } catch (error) {
-        console.log("Failed to fetch cached icon, will generate new one", error);
+        // Failed to fetch cached icon, will generate new one
       }
 
       // 如果缓存中没有，则生成新图标
@@ -214,7 +214,7 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete
         cache[domain] = iconUrl;
         localStorage.setItem(FAVICON_CACHE_KEY, JSON.stringify(cache));
       } catch (error) {
-        console.log("Failed to cache icon", error);
+        // Failed to cache icon - silently ignore
       }
     } catch (e) {
       console.error("Failed to fetch icon", e);
@@ -261,7 +261,7 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete
           domain = urlObj.hostname;
           cacheCustomIcon(domain, base64String);
         } catch (error) {
-          console.log("Failed to parse URL for caching", error);
+          // Failed to parse URL for caching - silently ignore
         }
       }
     };

@@ -1,13 +1,16 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, lazy, Suspense } from 'react';
 import { LinkItem, Category } from './types';
-import LinkModal from './components/LinkModal';
-import CategoryManagerModal from './components/CategoryManagerModal';
-import BackupModal from './components/BackupModal';
-import ImportModal from './components/ImportModal';
-import SettingsModal from './components/SettingsModal';
-import SearchConfigModal from './components/SearchConfigModal';
+
+// Lazy load modal components for better code splitting
+const LinkModal = lazy(() => import('./components/LinkModal'));
+const CategoryManagerModal = lazy(() => import('./components/CategoryManagerModal'));
+const BackupModal = lazy(() => import('./components/BackupModal'));
+const ImportModal = lazy(() => import('./components/ImportModal'));
+const SettingsModal = lazy(() => import('./components/SettingsModal'));
+const SearchConfigModal = lazy(() => import('./components/SearchConfigModal'));
+
+// Eagerly load frequently used components
 import ContextMenu from './components/ContextMenu';
-import QRCodeModal from './components/QRCodeModal';
 import Sidebar from './components/Sidebar';
 import MainHeader from './components/MainHeader';
 import LinkSections from './components/LinkSections';
@@ -113,10 +116,7 @@ function App() {
     isSettingsModalOpen,
     setIsSettingsModalOpen,
     isSearchConfigModalOpen,
-    setIsSearchConfigModalOpen,
-    qrCodeModal,
-    openQRCodeModal,
-    closeQRCodeModal
+    setIsSearchConfigModalOpen
   } = useModals();
 
   // === Computed: Displayed Links ===
@@ -180,7 +180,6 @@ function App() {
     handleContextMenu,
     closeContextMenu,
     copyLinkToClipboard,
-    showQRCode,
     editLinkFromContextMenu,
     deleteLinkFromContextMenu,
     togglePinFromContextMenu,
@@ -191,7 +190,6 @@ function App() {
     categories,
     updateData,
     onEditLink: openEditLinkModal,
-    onShowQRCode: openQRCodeModal,
     isBatchEditMode
   });
 
@@ -324,57 +322,59 @@ function App() {
   // === Render ===
   return (
     <div className={`flex h-screen overflow-hidden ${toneClasses.text}`}>
-      {/* Modals */}
-      <CategoryManagerModal
-        isOpen={isCatManagerOpen}
-        onClose={() => setIsCatManagerOpen(false)}
-        categories={categories}
-        onUpdateCategories={handleUpdateCategories}
-        onDeleteCategory={handleDeleteCategory}
-      />
+      {/* Modals - Wrapped in Suspense for lazy loading */}
+      <Suspense fallback={null}>
+        <CategoryManagerModal
+          isOpen={isCatManagerOpen}
+          onClose={() => setIsCatManagerOpen(false)}
+          categories={categories}
+          onUpdateCategories={handleUpdateCategories}
+          onDeleteCategory={handleDeleteCategory}
+        />
 
-      <BackupModal
-        isOpen={isBackupModalOpen}
-        onClose={() => setIsBackupModalOpen(false)}
-        links={links}
-        categories={categories}
-        onRestore={handleRestoreBackup}
-        webDavConfig={webDavConfig}
-        onSaveWebDavConfig={saveWebDavConfig}
-        searchConfig={{ mode: searchMode, externalSources: externalSearchSources }}
-        onRestoreSearchConfig={restoreSearchConfig}
-        aiConfig={aiConfig}
-        onRestoreAIConfig={restoreAIConfig}
-      />
+        <BackupModal
+          isOpen={isBackupModalOpen}
+          onClose={() => setIsBackupModalOpen(false)}
+          links={links}
+          categories={categories}
+          onRestore={handleRestoreBackup}
+          webDavConfig={webDavConfig}
+          onSaveWebDavConfig={saveWebDavConfig}
+          searchConfig={{ mode: searchMode, externalSources: externalSearchSources }}
+          onRestoreSearchConfig={restoreSearchConfig}
+          aiConfig={aiConfig}
+          onRestoreAIConfig={restoreAIConfig}
+        />
 
-      <ImportModal
-        isOpen={isImportModalOpen}
-        onClose={() => setIsImportModalOpen(false)}
-        existingLinks={links}
-        categories={categories}
-        onImport={handleImportConfirm}
-        onImportSearchConfig={restoreSearchConfig}
-        onImportAIConfig={restoreAIConfig}
-      />
+        <ImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          existingLinks={links}
+          categories={categories}
+          onImport={handleImportConfirm}
+          onImportSearchConfig={restoreSearchConfig}
+          onImportAIConfig={restoreAIConfig}
+        />
 
-      <SettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        config={aiConfig}
-        siteSettings={siteSettings}
-        onSave={saveAIConfig}
-        links={links}
-        onUpdateLinks={(newLinks) => updateData(newLinks, categories)}
-        onOpenImport={() => setIsImportModalOpen(true)}
-        onOpenBackup={() => setIsBackupModalOpen(true)}
-      />
+        <SettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={() => setIsSettingsModalOpen(false)}
+          config={aiConfig}
+          siteSettings={siteSettings}
+          onSave={saveAIConfig}
+          links={links}
+          onUpdateLinks={(newLinks) => updateData(newLinks, categories)}
+          onOpenImport={() => setIsImportModalOpen(true)}
+          onOpenBackup={() => setIsBackupModalOpen(true)}
+        />
 
-      <SearchConfigModal
-        isOpen={isSearchConfigModalOpen}
-        onClose={() => setIsSearchConfigModalOpen(false)}
-        sources={externalSearchSources}
-        onSave={(sources) => saveSearchConfig(sources, searchMode)}
-      />
+        <SearchConfigModal
+          isOpen={isSearchConfigModalOpen}
+          onClose={() => setIsSearchConfigModalOpen(false)}
+          sources={externalSearchSources}
+          onSave={(sources) => saveSearchConfig(sources, searchMode)}
+        />
+      </Suspense>
 
       {/* Sidebar Mobile Overlay */}
       {sidebarOpen && (
@@ -511,16 +511,18 @@ function App() {
       </main>
 
       {/* Link Modal */}
-      <LinkModal
-        isOpen={isModalOpen}
-        onClose={closeLinkModal}
-        onSave={editingLink ? handleEditLink : handleAddLink}
-        onDelete={editingLink ? handleDeleteLink : undefined}
-        categories={categories}
-        initialData={editingLink || (prefillLink as LinkItem)}
-        aiConfig={aiConfig}
-        defaultCategoryId={selectedCategory !== 'all' ? selectedCategory : undefined}
-      />
+      <Suspense fallback={null}>
+        <LinkModal
+          isOpen={isModalOpen}
+          onClose={closeLinkModal}
+          onSave={editingLink ? handleEditLink : handleAddLink}
+          onDelete={editingLink ? handleDeleteLink : undefined}
+          categories={categories}
+          initialData={editingLink || (prefillLink as LinkItem)}
+          aiConfig={aiConfig}
+          defaultCategoryId={selectedCategory !== 'all' ? selectedCategory : undefined}
+        />
+      </Suspense>
 
       {/* Context Menu */}
       <ContextMenu
@@ -529,20 +531,11 @@ function App() {
         categories={categories}
         onClose={closeContextMenu}
         onCopyLink={copyLinkToClipboard}
-        onShowQRCode={showQRCode}
         onEditLink={editLinkFromContextMenu}
         onDuplicateLink={duplicateLinkFromContextMenu}
         onMoveLink={moveLinkFromContextMenu}
         onDeleteLink={deleteLinkFromContextMenu}
         onTogglePin={togglePinFromContextMenu}
-      />
-
-      {/* QR Code Modal */}
-      <QRCodeModal
-        isOpen={qrCodeModal.isOpen}
-        url={qrCodeModal.url || ''}
-        title={qrCodeModal.title || ''}
-        onClose={closeQRCodeModal}
       />
     </div>
   );

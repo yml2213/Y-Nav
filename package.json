@@ -13,14 +13,9 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^1.30.0",
-    "@types/qrcode": "^1.5.6",
-    "buffer": "^6.0.3",
-    "jszip": "^3.10.1",
     "lucide-react": "^0.554.0",
-    "qrcode": "^1.5.4",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "uuid": "^13.0.0"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

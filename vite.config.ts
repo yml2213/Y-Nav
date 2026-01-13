@@ -18,6 +18,28 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              // React core libraries
+              'vendor-react': ['react', 'react-dom'],
+              // Drag and drop libraries
+              'vendor-dnd': [
+                '@dnd-kit/core',
+                '@dnd-kit/sortable',
+                '@dnd-kit/utilities'
+              ],
+              // Icon library
+              'vendor-icons': ['lucide-react'],
+              // AI library
+              'vendor-ai': ['@google/genai'],
+            }
+          }
+        },
+        // Increase chunk size warning limit to reduce warnings
+        chunkSizeWarningLimit: 1000
       }
     };
 });
