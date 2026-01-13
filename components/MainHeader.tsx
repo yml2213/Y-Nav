@@ -217,7 +217,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
   );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/50 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 border-b border-slate-200/30 dark:border-white/5 bg-white/40 dark:bg-slate-950/40 backdrop-blur-2xl">
       <div className="h-14 px-4 lg:px-8 flex items-center gap-4">
         <div className="flex items-center gap-2">
           <button onClick={onOpenSidebar} className="lg:hidden p-2 -ml-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
@@ -247,7 +247,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
                 <span className="text-xs font-medium text-amber-600 dark:text-amber-400 mr-1">排序中</span>
                 <button
                   onClick={isSortingPinned ? onSavePinnedSorting : onSaveCategorySorting}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md bg-emerald-500 text-white hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md bg-accent text-white hover:bg-accent/90 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors"
                   title="保存顺序"
                 >
                   <Save size={12} /> 保存
@@ -274,7 +274,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
           {/* Add Link - Primary Action */}
           <button
             onClick={onAddLink}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-95 transition-all duration-200"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-accent to-accent/80 hover:from-accent hover:to-accent/90 text-white shadow-lg shadow-accent/20 hover:shadow-accent/30 active:scale-95 transition-all duration-200"
             title="添加链接"
           >
             <span className="text-sm">+</span> 添加

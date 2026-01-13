@@ -367,7 +367,7 @@ function App() {
           <div className="absolute inset-0 bg-[#f8fafc] dark:hidden">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
             <div className="absolute left-[-10%] top-[-10%] w-[500px] h-[500px] rounded-full bg-blue-400/10 blur-[100px] mix-blend-multiply"></div>
-            <div className="absolute right-[-10%] bottom-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-400/10 blur-[100px] mix-blend-multiply"></div>
+            <div className="absolute right-[-10%] bottom-[-10%] w-[500px] h-[500px] rounded-full bg-violet-400/10 blur-[100px] mix-blend-multiply"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-50/80"></div>
           </div>
 

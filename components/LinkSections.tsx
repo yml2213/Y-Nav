@@ -73,7 +73,7 @@ const LinkSections: React.FC<LinkSectionsProps> = ({
           <div className="flex justify-center pt-12">
             <button
               onClick={onAddLink}
-              className="group flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-accent to-emerald-500 hover:from-accent/90 hover:to-emerald-600 shadow-lg shadow-accent/20 hover:shadow-accent/30 active:scale-95 transition-all duration-300"
+              className="group flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-accent to-purple-600 hover:from-accent/90 hover:to-purple-700 shadow-lg shadow-accent/20 hover:shadow-accent/30 active:scale-95 transition-all duration-300"
             >
               <span className="text-lg leading-none group-hover:rotate-90 transition-transform duration-300">+</span> 添加网址
             </button>
@@ -192,7 +192,7 @@ const LinkSections: React.FC<LinkSectionsProps> = ({
                       </button>
                       <button
                         onClick={onSelectAll}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-emerald-600 text-white text-xs font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-accent hover:bg-accent/80 text-white text-xs font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent/50"
                         title="全选/取消全选"
                       >
                         <CheckSquare size={13} />

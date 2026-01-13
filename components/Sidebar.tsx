@@ -38,37 +38,93 @@ const Sidebar: React.FC<SidebarProps> = ({
   onOpenBackup,
   onOpenSettings
 }) => {
+  const [displayText, setDisplayText] = React.useState('Nav');
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  React.useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const fullText = 'Nav';
+
+    if (isDeleting) {
+      if (displayText.length > 0) {
+        // Continue deleting
+        timeout = setTimeout(() => {
+          setDisplayText(prev => prev.slice(0, -1));
+        }, 100);
+      } else {
+        // Finished deleting, switch to typing after pause
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+        }, 200);
+      }
+    } else {
+      if (displayText.length < fullText.length) {
+        // Continue typing
+        timeout = setTimeout(() => {
+          setDisplayText(fullText.slice(0, displayText.length + 1));
+        }, 150);
+      } else {
+        // Finished typing, wait random time before deleting
+        const randomDelay = Math.floor(Math.random() * 5000) + 5000; // 5-10s
+        timeout = setTimeout(() => {
+          setIsDeleting(true);
+        }, randomDelay);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [displayText, isDeleting]);
+
   return (
     <aside
       className={`
         fixed lg:static inset-y-0 left-0 z-30 ${sidebarWidthClass} transform transition-all duration-300 ease-in-out
-        bg-white/90 dark:bg-slate-950/90 border-r border-slate-200/50 dark:border-white/5 backdrop-blur-xl flex flex-col
+        bg-white/40 dark:bg-slate-950/40 border-r border-slate-200/30 dark:border-white/5 backdrop-blur-2xl flex flex-col
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >
-      {/* Header - 减少顶部间距 */}
-      <div className={`h-14 flex items-center border-b border-slate-100/60 dark:border-white/5 shrink-0 relative ${isSidebarCollapsed ? 'justify-center px-2' : 'px-4'}`}>
-        <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-2'}`}>
+      {/* Header */}
+      <div className={`h-14 flex items-center justify-center border-b border-slate-100/60 dark:border-white/5 shrink-0 relative ${isSidebarCollapsed ? 'px-2' : 'px-4'}`}>
+        <div className={`flex items-center ${isSidebarCollapsed ? 'w-full justify-center' : 'gap-2'}`}>
           {isSidebarCollapsed ? (
-            <div className="h-7 w-7 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-white/5 flex items-center justify-center text-xs font-mono text-slate-500 dark:text-slate-400">
+            <button
+              onClick={onToggleCollapsed}
+              className="h-9 w-9 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-white/5 flex items-center justify-center text-sm font-mono text-slate-500 dark:text-slate-400 hover:text-accent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+              title="展开侧边栏"
+            >
               Y
-            </div>
+            </button>
           ) : (
-            <div className="flex items-center font-mono font-bold text-lg cursor-pointer select-none group" title={navTitleText}>
-              <span className="text-accent mr-1.5">~/</span>
-              <span className="text-slate-700 dark:text-slate-200 tracking-tight">Y-Nav</span>
-              <span className="w-2 h-4 bg-accent ml-1 animate-pulse rounded-sm"></span>
+            <div className="relative flex items-center justify-center font-mono font-bold text-lg cursor-pointer select-none group" title={navTitleText}>
+              {/* Ghost element for layout sizing (holds the full width) */}
+              <div className="flex items-center opacity-0 pointer-events-none" aria-hidden="true">
+                <span className="mr-1.5">~/</span>
+                <span className="tracking-tight">Y-</span>
+                <span className="tracking-tight">Nav</span>
+                <span className="w-2.5 ml-1"></span>
+              </div>
+
+              {/* Visible animated content */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center">
+                <span className="text-accent mr-1.5">~/</span>
+                <span className="text-slate-700 dark:text-slate-200 tracking-tight">Y-</span>
+                <span className="text-slate-700 dark:text-slate-200 tracking-tight">{displayText}</span>
+                <span className="w-2.5 h-5 bg-accent ml-1 animate-pulse rounded-[2px] opacity-80 shadow-[0_0_8px_rgb(var(--accent-color)/0.6)]"></span>
+              </div>
             </div>
           )}
         </div>
-        <button
-          onClick={onToggleCollapsed}
-          className="hidden lg:inline-flex absolute right-2 p-1.5 text-slate-400 hover:text-accent hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors"
-          title={isSidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
-          aria-label={isSidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
-        >
-          {isSidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+
+        {!isSidebarCollapsed && (
+          <button
+            onClick={onToggleCollapsed}
+            className="hidden lg:inline-flex absolute right-2 p-1.5 text-slate-400 hover:text-accent hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/50 transition-colors"
+            title="收起侧边栏"
+            aria-label="收起侧边栏"
+          >
+            <ChevronLeft size={16} />
+          </button>
+        )}
       </div>
 
       {/* Categories - 减少顶部间距 */}

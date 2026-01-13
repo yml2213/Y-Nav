@@ -1,54 +1,79 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://lucide.dev/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>云航 CloudNav</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: '#3b82f6',
-              secondary: '#64748b',
-              accent: '#10b981',
-              dark: '#0f172a',
-              card: '#1e293b',
-            }
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="https://lucide.dev/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>云航 CloudNav</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3b82f6',
+            secondary: '#64748b',
+            accent: 'rgb(var(--accent-color) / <alpha-value>)',
+            dark: '#0f172a',
+            card: '#1e293b',
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+  </script>
+  <style>
+    body {
+      font-family: "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    :root {
+      --accent-color: 99 102 241;
+    }
+
+    .font-display {
+      font-family: "Outfit", "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+
+    /* Custom scrollbar for sidebar */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Simple CSS-only tooltip transition */
+    .tooltip-custom {
+      transition: opacity 0.2s, visibility 0.2s;
+      pointer-events: none;
+    }
+
+    /* Terminal cursor blink animation */
+    @keyframes cursor-blink {
+
+      0%,
+      100% {
+        opacity: 1;
       }
-      :root {
-        --accent-color: #10b981;
+
+      50% {
+        opacity: 0;
       }
-      .font-display {
-        font-family: "Outfit", "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-      }
-      /* Custom scrollbar for sidebar */
-      .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-      }
-      .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-      }
-      /* Simple CSS-only tooltip transition */
-      .tooltip-custom {
-          transition: opacity 0.2s, visibility 0.2s;
-          pointer-events: none;
-      }
-    </style>
+    }
+
+    .animate-cursor-blink {
+      animation: cursor-blink 1s step-end infinite;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -62,10 +87,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-    <div id="root"></div>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
