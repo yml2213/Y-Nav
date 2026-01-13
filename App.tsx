@@ -364,18 +364,33 @@ function App() {
       <main className="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-50 dark:bg-slate-950">
         <div className="absolute inset-0 pointer-events-none">
           {/* Light Mode Background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-slate-50 to-slate-100 dark:hidden"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:hidden"></div>
 
-          {/* Dark Mode Aurora Background */}
-          <div className="absolute inset-0 hidden dark:block bg-[#0b1121]" style={{
-            backgroundImage: `
-              radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
-              radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '30px 30px, 50px 50px',
-            backgroundPosition: '0 0, 15px 15px',
-            backgroundAttachment: 'fixed'
-          }}></div>
+          {/* Dark Mode Atmosphere */}
+          <div className="absolute inset-0 hidden dark:block bg-[#05070f]"></div>
+          <div
+            className="absolute inset-0 hidden dark:block"
+            style={{
+              backgroundImage:
+                'radial-gradient(680px 420px at 12% 18%, rgba(16,185,129,0.16), transparent 62%), radial-gradient(560px 360px at 86% 12%, rgba(56,189,248,0.18), transparent 60%), radial-gradient(820px 520px at 50% 90%, rgba(99,102,241,0.12), transparent 70%)'
+            }}
+          ></div>
+          <div
+            className="absolute inset-0 hidden dark:block opacity-40"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E\")",
+              backgroundSize: '160px 160px',
+              mixBlendMode: 'soft-light'
+            }}
+          ></div>
+          <div
+            className="absolute inset-0 hidden dark:block opacity-70"
+            style={{
+              backgroundImage:
+                'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.06), transparent 55%)'
+            }}
+          ></div>
         </div>
 
         <div className="relative z-10 flex flex-col h-full">
