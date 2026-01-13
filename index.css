@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@import "@fontsource/manrope";
+@import "@fontsource/outfit";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --color-primary: #3b82f6;
+    --color-secondary: #64748b;
+    --color-accent: rgb(var(--accent-color));
+    --color-dark: #0f172a;
+    --color-card: #1e293b;
+
+    --font-display: "Outfit", "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+@layer base {
+    :root {
+        --accent-color: 99 102 241;
+    }
+
+    body {
+        font-family: "Manrope", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    }
+}
+
+/* Custom scrollbar for sidebar */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Simple CSS-only tooltip transition */
+.tooltip-custom {
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+}
+
+/* Terminal cursor blink animation */
+@keyframes cursor-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.animate-cursor-blink {
+    animation: cursor-blink 1s step-end infinite;
+}
