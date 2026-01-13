@@ -85,6 +85,19 @@ const MainHeader: React.FC<MainHeaderProps> = ({
 
   // More menu dropdown state
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const searchBar = (
     <div className="relative w-full group">
@@ -184,6 +197,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
           </button>
 
           <input
+            ref={searchInputRef}
             type="text"
             placeholder={
               searchMode === 'internal'
