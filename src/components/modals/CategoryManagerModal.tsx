@@ -10,6 +10,7 @@ interface CategoryManagerModalProps {
   categories: Category[];
   onUpdateCategories: (newCategories: Category[]) => void;
   onDeleteCategory: (id: string) => void;
+  closeOnBackdrop?: boolean;
 }
 
 const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
@@ -17,7 +18,8 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
   onClose,
   categories,
   onUpdateCategories,
-  onDeleteCategory
+  onDeleteCategory,
+  closeOnBackdrop = true
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -176,7 +178,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden border border-slate-200 dark:border-slate-700 flex flex-col max-h-[85vh]"
@@ -369,7 +371,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
           {isIconSelectorOpen && (
             <div
               className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-              onClick={cancelIconSelector}
+              onClick={closeOnBackdrop ? cancelIconSelector : undefined}
             >
               <div
                 className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"

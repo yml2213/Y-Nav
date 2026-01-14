@@ -11,6 +11,7 @@ interface ImportModalProps {
     onImport: (newLinks: LinkItem[], newCategories: Category[]) => void;
     onImportSearchConfig?: (searchConfig: SearchConfig) => void;
     onImportAIConfig?: (aiConfig: AIConfig) => void;
+    closeOnBackdrop?: boolean;
 }
 
 const ImportModal: React.FC<ImportModalProps> = ({
@@ -20,7 +21,8 @@ const ImportModal: React.FC<ImportModalProps> = ({
     categories,
     onImport,
     onImportSearchConfig,
-    onImportAIConfig
+    onImportAIConfig,
+    closeOnBackdrop = true
 }) => {
     const [step, setStep] = useState<'upload' | 'preview'>('upload');
     const [file, setFile] = useState<File | null>(null);
@@ -213,7 +215,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-            onClick={handleClose}
+            onClick={closeOnBackdrop ? handleClose : undefined}
         >
             <div
                 className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700"

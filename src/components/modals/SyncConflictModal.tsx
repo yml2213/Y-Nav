@@ -13,13 +13,15 @@ interface SyncConflictModalProps {
     conflict: SyncConflict | null;
     onResolve: (choice: 'local' | 'remote') => void;
     onClose: () => void;
+    closeOnBackdrop?: boolean;
 }
 
 const SyncConflictModal: React.FC<SyncConflictModalProps> = ({
     isOpen,
     conflict,
     onResolve,
-    onClose
+    onClose,
+    closeOnBackdrop = true
 }) => {
     if (!isOpen || !conflict) return null;
 
@@ -40,7 +42,7 @@ const SyncConflictModal: React.FC<SyncConflictModalProps> = ({
     return (
         <div
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={closeOnBackdrop ? onClose : undefined}
         >
             <div
                 className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 duration-200"

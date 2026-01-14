@@ -359,6 +359,8 @@ function App() {
     return { bg: 'bg-slate-50 dark:bg-slate-950', text: 'text-slate-900 dark:text-slate-50' };
   }, [siteSettings.grayScale]);
 
+  const closeOnBackdrop = siteSettings.closeOnBackdrop ?? false;
+
   // === KV Sync: Initial Load ===
   useEffect(() => {
     // 只在本地数据加载完成后执行一次
@@ -456,6 +458,7 @@ function App() {
           categories={categories}
           onUpdateCategories={handleUpdateCategories}
           onDeleteCategory={handleDeleteCategory}
+          closeOnBackdrop={closeOnBackdrop}
         />
 
         <ImportModal
@@ -466,6 +469,7 @@ function App() {
           onImport={handleImportConfirm}
           onImportSearchConfig={restoreSearchConfig}
           onImportAIConfig={restoreAIConfig}
+          closeOnBackdrop={closeOnBackdrop}
         />
 
         <SettingsModal
@@ -477,6 +481,7 @@ function App() {
           links={links}
           onUpdateLinks={(newLinks) => updateData(newLinks, categories)}
           onOpenImport={() => setIsImportModalOpen(true)}
+          closeOnBackdrop={closeOnBackdrop}
         />
 
         <SearchConfigModal
@@ -484,6 +489,7 @@ function App() {
           onClose={() => setIsSearchConfigModalOpen(false)}
           sources={externalSearchSources}
           onSave={(sources) => saveSearchConfig(sources, searchMode)}
+          closeOnBackdrop={closeOnBackdrop}
         />
 
         {/* Sync Conflict Modal */}
@@ -492,6 +498,7 @@ function App() {
           conflict={currentConflict}
           onResolve={handleResolveConflict}
           onClose={() => setSyncConflictOpen(false)}
+          closeOnBackdrop={closeOnBackdrop}
         />
       </Suspense>
 
@@ -651,6 +658,7 @@ function App() {
           initialData={editingLink || (prefillLink as LinkItem)}
           aiConfig={aiConfig}
           defaultCategoryId={selectedCategory !== 'all' ? selectedCategory : undefined}
+          closeOnBackdrop={closeOnBackdrop}
         />
       </Suspense>
 

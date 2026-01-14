@@ -24,6 +24,7 @@ interface SearchConfigModalProps {
   onClose: () => void;
   sources: ExternalSearchSource[];
   onSave: (sources: ExternalSearchSource[]) => void;
+  closeOnBackdrop?: boolean;
 }
 
 // 可排序的列表项组件
@@ -136,7 +137,11 @@ const SortableSearchItem = ({
 
 
 const SearchConfigModal: React.FC<SearchConfigModalProps> = ({
-  isOpen, onClose, sources, onSave
+  isOpen,
+  onClose,
+  sources,
+  onSave,
+  closeOnBackdrop = true
 }) => {
   const [localSources, setLocalSources] = useState<ExternalSearchSource[]>(sources);
   const [newSource, setNewSource] = useState({ name: '', url: '' });
@@ -227,7 +232,7 @@ const SearchConfigModal: React.FC<SearchConfigModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-      onClick={onClose}
+      onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 dark:border-slate-800 flex flex-col max-h-[85vh] transition-transform duration-300 transform scale-100"

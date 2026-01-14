@@ -49,6 +49,7 @@ const generateSvgIcon = (text: string, color1: string, color2: string) => {
 const SiteTab: React.FC<SiteTabProps> = ({ settings, onChange }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [generatedIcons, setGeneratedIcons] = useState<string[]>([]);
+    const closeOnBackdrop = !!settings.closeOnBackdrop;
 
     const updateGeneratedIcons = (text: string) => {
         const newIcons: string[] = [];
@@ -166,6 +167,35 @@ const SiteTab: React.FC<SiteTabProps> = ({ settings, onChange }) => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="h-px bg-slate-100 dark:bg-slate-800" />
+
+            <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">弹窗交互</label>
+                <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <div className="text-sm font-semibold text-slate-700 dark:text-slate-200">点击遮罩关闭弹窗</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">关闭可避免误触</div>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => onChange('closeOnBackdrop', !closeOnBackdrop)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${closeOnBackdrop
+                            ? 'bg-accent'
+                            : 'bg-slate-300 dark:bg-slate-600'
+                            }`}
+                        aria-pressed={closeOnBackdrop}
+                        aria-label="点击遮罩关闭弹窗"
+                    >
+                        <span
+                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${closeOnBackdrop
+                                ? 'translate-x-5'
+                                : 'translate-x-1'
+                                }`}
+                        />
+                    </button>
                 </div>
             </div>
         </div>

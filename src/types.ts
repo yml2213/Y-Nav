@@ -24,6 +24,7 @@ export interface SiteSettings {
   cardStyle: 'detailed' | 'simple';
   accentColor?: string; // RGB values e.g. "99 102 241"
   grayScale?: 'slate' | 'zinc' | 'neutral'; // Background tone
+  closeOnBackdrop?: boolean; // Allow closing modals by clicking the backdrop
 }
 
 export interface AppState {

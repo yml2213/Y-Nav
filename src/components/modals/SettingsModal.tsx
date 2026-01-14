@@ -15,10 +15,19 @@ interface SettingsModalProps {
   links: LinkItem[];
   onUpdateLinks: (links: LinkItem[]) => void;
   onOpenImport: () => void;
+  closeOnBackdrop?: boolean;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
-  isOpen, onClose, config, siteSettings, onSave, links, onUpdateLinks, onOpenImport
+  isOpen,
+  onClose,
+  config,
+  siteSettings,
+  onSave,
+  links,
+  onUpdateLinks,
+  onOpenImport,
+  closeOnBackdrop = true
 }) => {
   const [activeTab, setActiveTab] = useState<'site' | 'ai' | 'appearance' | 'data'>('site');
   const [localConfig, setLocalConfig] = useState<AIConfig>(config);
@@ -27,7 +36,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     favicon: siteSettings?.favicon || '',
     cardStyle: siteSettings?.cardStyle || 'detailed',
     accentColor: siteSettings?.accentColor || '99 102 241',
-    grayScale: siteSettings?.grayScale || 'slate'
+    grayScale: siteSettings?.grayScale || 'slate',
+    closeOnBackdrop: siteSettings?.closeOnBackdrop ?? false
   }));
 
   useEffect(() => {
@@ -38,7 +48,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         favicon: siteSettings?.favicon || '',
         cardStyle: siteSettings?.cardStyle || 'detailed',
         accentColor: siteSettings?.accentColor || '99 102 241',
-        grayScale: siteSettings?.grayScale || 'slate'
+        grayScale: siteSettings?.grayScale || 'slate',
+        closeOnBackdrop: siteSettings?.closeOnBackdrop ?? false
       });
       setActiveTab('site');
     }
@@ -62,7 +73,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-      onClick={onClose}
+      onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 dark:border-slate-800 transition-transform duration-300 flex flex-col max-h-[90vh]"

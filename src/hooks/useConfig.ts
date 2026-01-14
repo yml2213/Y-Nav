@@ -13,7 +13,8 @@ const DEFAULT_SITE_SETTINGS: SiteSettings = {
     title: '元启 - AI 智能导航',
     navTitle: '元启',
     favicon: '',
-    cardStyle: 'detailed'
+    cardStyle: 'detailed',
+    closeOnBackdrop: false
 };
 
 export function useConfig() {
@@ -107,4 +108,3 @@ export function useConfig() {
         navTitleShort
     };
 }
-

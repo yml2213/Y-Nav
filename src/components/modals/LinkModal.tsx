@@ -14,9 +14,20 @@ interface LinkModalProps {
   initialData?: LinkItem;
   aiConfig: AIConfig;
   defaultCategoryId?: string;
+  closeOnBackdrop?: boolean;
 }
 
-const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete, categories, initialData, aiConfig, defaultCategoryId }) => {
+const LinkModal: React.FC<LinkModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  onDelete,
+  categories,
+  initialData,
+  aiConfig,
+  defaultCategoryId,
+  closeOnBackdrop = true
+}) => {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
@@ -284,7 +295,7 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSave, onDelete
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
-      onClick={onClose}
+      onClick={closeOnBackdrop ? onClose : undefined}
     >
       <div
         className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-100 dark:border-slate-800 transition-transform duration-300"
