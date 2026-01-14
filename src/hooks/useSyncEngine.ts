@@ -24,6 +24,7 @@ import {
     SYNC_DEBOUNCE_MS,
     SYNC_API_ENDPOINT,
     SYNC_META_KEY,
+    SYNC_PASSWORD_KEY,
     getDeviceId
 } from '../utils/constants';
 
@@ -69,6 +70,14 @@ const saveLocalSyncMeta = (meta: SyncMetadata): void => {
     localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta));
 };
 
+const getAuthHeaders = (): HeadersInit => {
+    const password = localStorage.getItem(SYNC_PASSWORD_KEY);
+    return {
+        'Content-Type': 'application/json',
+        ...(password ? { 'X-Sync-Password': password } : {})
+    };
+};
+
 export function useSyncEngine(options: UseSyncEngineOptions = {}): UseSyncEngineReturn {
     const { onConflict, onSyncComplete, onError } = options;
 
@@ -86,7 +95,9 @@ export function useSyncEngine(options: UseSyncEngineOptions = {}): UseSyncEngine
         setSyncStatus('syncing');
 
         try {
-            const response = await fetch(SYNC_API_ENDPOINT);
+            const response = await fetch(SYNC_API_ENDPOINT, {
+                headers: getAuthHeaders()
+            });
             const result = await response.json();
 
             if (!result.success) {
@@ -138,7 +149,7 @@ export function useSyncEngine(options: UseSyncEngineOptions = {}): UseSyncEngine
         try {
             const response = await fetch(SYNC_API_ENDPOINT, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     data: syncData,
                     expectedVersion: force ? undefined : localMeta?.version
@@ -230,7 +241,7 @@ export function useSyncEngine(options: UseSyncEngineOptions = {}): UseSyncEngine
         try {
             const response = await fetch(`${SYNC_API_ENDPOINT}?action=backup`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ data: syncData })
             });
 

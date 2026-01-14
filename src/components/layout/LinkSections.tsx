@@ -102,9 +102,9 @@ const LinkSections: React.FC<LinkSectionsProps> = ({
   };
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-4 scrollbar-hide">
+    <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-0 scrollbar-hide">
       {/* Content wrapper with max-width - Added min-h and flex to push footer to bottom */}
-      <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-100px)] flex flex-col">
+      <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-48px)] flex flex-col">
 
 
         {/* Dashboard Header / Greeting */}
@@ -335,7 +335,7 @@ const LinkSections: React.FC<LinkSectionsProps> = ({
         )}
 
         {/* Footer - Pushed to bottom */}
-        <footer className="mt-auto py-8 text-center animate-in fade-in duration-700 delay-300">
+        <footer className="mt-auto pt-6 pb-3 text-center animate-in fade-in duration-700 delay-300">
           <div className="inline-flex items-center justify-center gap-3 px-4 py-2 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-100 dark:border-white/5 backdrop-blur-sm shadow-sm transition-all hover:shadow-md hover:scale-[1.02] hover:bg-white dark:hover:bg-slate-800">
             <span className="flex items-center gap-1.5 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent text-xs font-bold font-mono">
               Y-Nav <span className="text-slate-300 dark:text-slate-600 font-light">|</span> v{__APP_VERSION__}

@@ -17,6 +17,7 @@ interface KVNamespaceInterface {
 
 interface Env {
     YNAV_KV: KVNamespaceInterface;
+    SYNC_PASSWORD?: string; // 可选的同步密码
 }
 
 interface SyncMetadata {
@@ -38,8 +39,30 @@ interface YNavSyncData {
 const KV_MAIN_DATA_KEY = 'ynav:data';
 const KV_BACKUP_PREFIX = 'ynav:backup:';
 
+// 辅助函数：验证密码
+const isAuthenticated = (request: Request, env: Env): boolean => {
+    // 如果服务端未设置密码，则默认允许访问（为了兼容性和简易部署）
+    if (!env.SYNC_PASSWORD || env.SYNC_PASSWORD.trim() === '') {
+        return true;
+    }
+
+    // 获取请求头中的密码
+    const authHeader = request.headers.get('X-Sync-Password');
+
+    // 简单的字符串比对
+    return authHeader === env.SYNC_PASSWORD;
+};
+
 // GET /api/sync - 读取云端数据
-async function handleGet(env: Env): Promise<Response> {
+async function handleGet(request: Request, env: Env): Promise<Response> {
+    // 鉴权检查
+    if (!isAuthenticated(request, env)) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Unauthorized: 密码错误或未配置'
+        }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     try {
         const data = await env.YNAV_KV.get(KV_MAIN_DATA_KEY, 'json');
 
@@ -72,6 +95,14 @@ async function handleGet(env: Env): Promise<Response> {
 
 // POST /api/sync - 写入云端数据
 async function handlePost(request: Request, env: Env): Promise<Response> {
+    // 鉴权检查
+    if (!isAuthenticated(request, env)) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Unauthorized: 密码错误或未配置'
+        }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     try {
         const body = await request.json() as {
             data: YNavSyncData;
@@ -141,6 +172,14 @@ async function handlePost(request: Request, env: Env): Promise<Response> {
 
 // POST /api/sync (with action=backup) - 创建快照备份
 async function handleBackup(request: Request, env: Env): Promise<Response> {
+    // 鉴权检查 (虽然复用了 router，但为了安全再次明确)
+    if (!isAuthenticated(request, env)) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Unauthorized'
+        }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     try {
         const body = await request.json() as { data: YNavSyncData };
 
@@ -184,7 +223,15 @@ async function handleBackup(request: Request, env: Env): Promise<Response> {
 }
 
 // GET /api/sync (with action=backups) - 获取备份列表
-async function handleListBackups(env: Env): Promise<Response> {
+async function handleListBackups(request: Request, env: Env): Promise<Response> {
+    // 鉴权检查
+    if (!isAuthenticated(request, env)) {
+        return new Response(JSON.stringify({
+            success: false,
+            error: 'Unauthorized'
+        }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+
     try {
         const list = await env.YNAV_KV.list({ prefix: KV_BACKUP_PREFIX });
 
@@ -220,9 +267,9 @@ export const onRequest = async (context: { request: Request; env: Env }) => {
     // 根据请求方法和 action 参数路由
     if (request.method === 'GET') {
         if (action === 'backups') {
-            return handleListBackups(env);
+            return handleListBackups(request, env);
         }
-        return handleGet(env);
+        return handleGet(request, env);
     }
 
     if (request.method === 'POST') {

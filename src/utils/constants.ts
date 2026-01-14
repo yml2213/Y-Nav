@@ -9,6 +9,7 @@ export const THEME_KEY = 'theme';
 // Sync System Keys
 export const DEVICE_ID_KEY = 'ynav_device_id';
 export const SYNC_META_KEY = 'ynav_sync_meta';
+export const SYNC_PASSWORD_KEY = 'ynav_sync_password';
 export const LAST_SYNC_KEY = 'ynav_last_sync';
 
 // Sync Configuration
