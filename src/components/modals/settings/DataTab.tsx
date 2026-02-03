@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Database, Upload, Cloud, Lock, Eye, EyeOff, RefreshCw, Clock, Cpu, CloudUpload, CloudDownload, Trash2 } from 'lucide-react';
-import { SYNC_API_ENDPOINT, SYNC_PASSWORD_KEY } from '../../../utils/constants';
+import { SyncStatus } from '../../../types';
+import { SYNC_API_ENDPOINT, SYNC_META_KEY, SYNC_PASSWORD_KEY, SYNC_API_VERSION, SYNC_DATA_SCHEMA_VERSION } from '../../../utils/constants';
 
 interface DataTabProps {
     onOpenImport: () => void;
@@ -15,6 +16,8 @@ interface DataTabProps {
     onTogglePrivacyGroup: (enabled: boolean) => void;
     privacyAutoUnlockEnabled: boolean;
     onTogglePrivacyAutoUnlock: (enabled: boolean) => void;
+    syncStatus?: SyncStatus;
+    lastSyncTime?: number | null;
 }
 
 interface BackupItem {
@@ -26,6 +29,8 @@ interface BackupItem {
     version?: number;
     browser?: string;
     os?: string;
+    apiVersion?: string;
+    schemaVersion?: number;
 }
 
 const DataTab: React.FC<DataTabProps> = ({
@@ -40,7 +45,9 @@ const DataTab: React.FC<DataTabProps> = ({
     privacyGroupEnabled,
     onTogglePrivacyGroup,
     privacyAutoUnlockEnabled,
-    onTogglePrivacyAutoUnlock
+    onTogglePrivacyAutoUnlock,
+    syncStatus = 'idle',
+    lastSyncTime = null
 }) => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -51,6 +58,10 @@ const DataTab: React.FC<DataTabProps> = ({
     const [createError, setCreateError] = useState<string | null>(null);
     const [restoringKey, setRestoringKey] = useState<string | null>(null);
     const [deletingKey, setDeletingKey] = useState<string | null>(null);
+    const [localMeta, setLocalMeta] = useState<any | null>(null);
+    const [remoteInfo, setRemoteInfo] = useState<{ apiVersion?: string; schemaVersion?: number; meta?: any } | null>(null);
+    const [remoteError, setRemoteError] = useState<string | null>(null);
+    const [isLoadingRemote, setIsLoadingRemote] = useState(false);
     const [privacyTarget, setPrivacyTarget] = useState<'sync' | 'separate' | null>(null);
     const [privacyOldPassword, setPrivacyOldPassword] = useState('');
     const [privacyNewPassword, setPrivacyNewPassword] = useState('');
@@ -62,6 +73,15 @@ const DataTab: React.FC<DataTabProps> = ({
     useEffect(() => {
         setPassword(localStorage.getItem(SYNC_PASSWORD_KEY) || '');
     }, []);
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem(SYNC_META_KEY);
+            setLocalMeta(stored ? JSON.parse(stored) : null);
+        } catch {
+            setLocalMeta(null);
+        }
+    }, [syncStatus, lastSyncTime]);
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newVal = e.target.value;
@@ -115,6 +135,52 @@ const DataTab: React.FC<DataTabProps> = ({
         }
         return deviceId;
     };
+
+    const formatSyncTime = (ts?: number | null) => {
+        if (!ts) return '未同步';
+        return new Date(ts).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    };
+
+    const getStatusLabel = (status: SyncStatus) => {
+        if (status === 'synced') return { text: '已同步', cls: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' };
+        if (status === 'syncing') return { text: '同步中', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' };
+        if (status === 'pending') return { text: '待同步', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' };
+        if (status === 'conflict') return { text: '冲突', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' };
+        if (status === 'error') return { text: '错误', cls: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' };
+        return { text: '空闲', cls: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300' };
+    };
+
+    const fetchRemoteInfo = useCallback(async () => {
+        setIsLoadingRemote(true);
+        setRemoteError(null);
+        try {
+            const response = await fetch(SYNC_API_ENDPOINT, { headers: getAuthHeaders() });
+            const result = await response.json();
+            if (!result.success) {
+                setRemoteInfo(null);
+                setRemoteError(result.error || '获取云端状态失败');
+                return;
+            }
+            const data = result.data || null;
+            setRemoteInfo({
+                apiVersion: result.apiVersion,
+                schemaVersion: data?.schemaVersion,
+                meta: data?.meta
+            });
+        } catch (error: any) {
+            setRemoteInfo(null);
+            setRemoteError(error.message || '网络错误');
+        } finally {
+            setIsLoadingRemote(false);
+        }
+    }, [getAuthHeaders]);
 
     const fetchBackups = useCallback(async () => {
         setIsLoadingBackups(true);
@@ -219,6 +285,10 @@ const DataTab: React.FC<DataTabProps> = ({
         fetchBackups();
     }, [fetchBackups]);
 
+    useEffect(() => {
+        fetchRemoteInfo();
+    }, [fetchRemoteInfo]);
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div>
@@ -264,6 +334,65 @@ const DataTab: React.FC<DataTabProps> = ({
                         <p className="text-[10px] text-green-600/80 dark:text-green-400/80 mt-1.5 leading-relaxed">
                             如需增强安全性，请在 Cloudflare Pages 后台设置 <code>SYNC_PASSWORD</code> 环境变量，并在此处输入相同密码。
                         </p>
+                    </div>
+                </div>
+
+                {/* Sync Status */}
+                <div className="mb-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/40">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+                            <Cloud size={14} className="text-slate-500" />
+                            同步状态
+                        </div>
+                        <button
+                            type="button"
+                            onClick={fetchRemoteInfo}
+                            disabled={isLoadingRemote}
+                            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-accent transition-colors disabled:opacity-60"
+                        >
+                            <RefreshCw size={12} className={isLoadingRemote ? 'animate-spin' : ''} />
+                            刷新
+                        </button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 p-3">
+                            <div className="flex items-center justify-between">
+                                <div className="text-slate-600 dark:text-slate-400">本地</div>
+                                {(() => {
+                                    const badge = getStatusLabel(syncStatus);
+                                    return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${badge.cls}`}>{badge.text}</span>;
+                                })()}
+                            </div>
+                            <div className="mt-2 space-y-1 text-slate-700 dark:text-slate-200">
+                                <div>最后同步：{formatSyncTime(lastSyncTime)}</div>
+                                <div>Revision：{typeof localMeta?.version === 'number' ? localMeta.version : '-'}</div>
+                                <div>更新时间：{formatSyncTime(localMeta?.updatedAt)}</div>
+                                <div>设备：{formatDeviceLabel(localMeta?.deviceId, localMeta?.browser, localMeta?.os)}</div>
+                                <div>API：{SYNC_API_VERSION} / Schema：v{SYNC_DATA_SCHEMA_VERSION}</div>
+                            </div>
+                        </div>
+
+                        <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 p-3">
+                            <div className="flex items-center justify-between">
+                                <div className="text-slate-600 dark:text-slate-400">云端</div>
+                                <span className="text-[10px] text-slate-400">
+                                    {remoteInfo?.apiVersion ? `API ${remoteInfo.apiVersion}` : ''}
+                                </span>
+                            </div>
+                            <div className="mt-2 space-y-1 text-slate-700 dark:text-slate-200">
+                                {remoteError ? (
+                                    <div className="text-red-600 dark:text-red-400 break-all">{remoteError}</div>
+                                ) : (
+                                    <>
+                                        <div>Revision：{typeof remoteInfo?.meta?.version === 'number' ? remoteInfo.meta.version : '-'}</div>
+                                        <div>更新时间：{formatSyncTime(remoteInfo?.meta?.updatedAt)}</div>
+                                        <div>设备：{formatDeviceLabel(remoteInfo?.meta?.deviceId, remoteInfo?.meta?.browser, remoteInfo?.meta?.os)}</div>
+                                        <div>Schema：{typeof remoteInfo?.schemaVersion === 'number' ? `v${remoteInfo.schemaVersion}` : '-'}</div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -470,6 +599,16 @@ const DataTab: React.FC<DataTabProps> = ({
                                         <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                                             <Clock size={12} />
                                             <span>{formatBackupTime(backup)}</span>
+                                            {typeof backup.version === 'number' && (
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700/60 text-[10px] text-slate-600 dark:text-slate-300">
+                                                    rev {backup.version}
+                                                </span>
+                                            )}
+                                            {backup.apiVersion && (
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700/60 text-[10px] text-slate-600 dark:text-slate-300">
+                                                    {backup.apiVersion}
+                                                </span>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <button

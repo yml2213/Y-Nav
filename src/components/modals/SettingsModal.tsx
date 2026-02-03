@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Bot, Globe, Palette, Database } from 'lucide-react';
-import { AIConfig, LinkItem, SiteSettings } from '../../types';
+import { AIConfig, LinkItem, SiteSettings, SyncStatus } from '../../types';
 import SiteTab from './settings/SiteTab';
 import AITab from './settings/AITab';
 import AppearanceTab from './settings/AppearanceTab';
@@ -25,6 +25,8 @@ interface SettingsModalProps {
   onTogglePrivacyGroup: (enabled: boolean) => void;
   privacyAutoUnlockEnabled: boolean;
   onTogglePrivacyAutoUnlock: (enabled: boolean) => void;
+  syncStatus?: SyncStatus;
+  lastSyncTime?: number | null;
   closeOnBackdrop?: boolean;
 }
 
@@ -47,6 +49,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onTogglePrivacyGroup,
   privacyAutoUnlockEnabled,
   onTogglePrivacyAutoUnlock,
+  syncStatus,
+  lastSyncTime,
   closeOnBackdrop = true
 }) => {
   const [activeTab, setActiveTab] = useState<'site' | 'ai' | 'appearance' | 'data'>('site');
@@ -197,6 +201,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               onTogglePrivacyGroup={onTogglePrivacyGroup}
               privacyAutoUnlockEnabled={privacyAutoUnlockEnabled}
               onTogglePrivacyAutoUnlock={onTogglePrivacyAutoUnlock}
+              syncStatus={syncStatus}
+              lastSyncTime={lastSyncTime}
             />
           )}
         </div>

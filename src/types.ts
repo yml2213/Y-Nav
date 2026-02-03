@@ -120,6 +120,7 @@ export interface YNavSyncData {
   aiConfig?: AIConfig;
   siteSettings?: SiteSettings;
   privateVault?: string;
+  schemaVersion?: number;
   meta: SyncMetadata;
 }
 

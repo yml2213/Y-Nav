@@ -24,7 +24,10 @@ export const PRIVATE_CATEGORY_ID = '__private__';
 
 // Sync Configuration
 export const SYNC_DEBOUNCE_MS = 3000; // 3秒内无新操作则触发同步
-export const SYNC_API_ENDPOINT = '/api/sync';
+export const SYNC_API_ENDPOINT = '/api/v1/sync';
+// Sync API/Schema Versions
+export const SYNC_API_VERSION = 'v1';
+export const SYNC_DATA_SCHEMA_VERSION = 1;
 
 // GitHub Repo URL
 export const GITHUB_REPO_URL = 'https://github.com/yml2213/Y-Nav.git';

@@ -25,6 +25,7 @@ import {
     SYNC_API_ENDPOINT,
     SYNC_META_KEY,
     SYNC_PASSWORD_KEY,
+    SYNC_DATA_SCHEMA_VERSION,
     getDeviceId,
     getDeviceInfo
 } from '../utils/constants';
@@ -380,6 +381,7 @@ export function buildSyncData(
         searchConfig,
         aiConfig,
         siteSettings,
-        privateVault
+        privateVault,
+        schemaVersion: SYNC_DATA_SCHEMA_VERSION
     };
 }

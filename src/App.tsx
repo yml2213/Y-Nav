@@ -1081,6 +1081,8 @@ function App() {
           onTogglePrivacyGroup={handleTogglePrivacyGroup}
           privacyAutoUnlockEnabled={privacyAutoUnlockEnabled}
           onTogglePrivacyAutoUnlock={handleTogglePrivacyAutoUnlock}
+          syncStatus={syncStatus}
+          lastSyncTime={lastSyncTime}
           closeOnBackdrop={closeOnBackdrop}
         />
 

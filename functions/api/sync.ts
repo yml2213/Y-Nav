@@ -26,6 +26,8 @@ interface SyncMetadata {
     updatedAt: number;
     deviceId: string;
     version: number;
+    browser?: string;
+    os?: string;
 }
 
 interface YNavSyncData {
@@ -35,13 +37,39 @@ interface YNavSyncData {
     aiConfig?: any;
     siteSettings?: any;
     privateVault?: string;
+    schemaVersion?: number;
     meta: SyncMetadata;
 }
 
 // KV Key 常量
-const KV_MAIN_DATA_KEY = 'ynav:data';
-const KV_BACKUP_PREFIX = 'ynav:backup:';
+const SYNC_API_VERSION = 'v1';
+const KV_MAIN_DATA_KEY = `ynav:data:${SYNC_API_VERSION}`;
+const KV_BACKUP_PREFIX = `ynav:backup:${SYNC_API_VERSION}:`;
+// Legacy (pre-versioned) keys for backward compatibility
+const KV_LEGACY_MAIN_DATA_KEY = 'ynav:data';
+const KV_LEGACY_BACKUP_PREFIX = 'ynav:backup:';
 const BACKUP_TTL_SECONDS = 30 * 24 * 60 * 60;
+
+const isBackupKeyValid = (backupKey: string) => (
+    backupKey.startsWith(KV_BACKUP_PREFIX) || backupKey.startsWith(KV_LEGACY_BACKUP_PREFIX)
+);
+
+const getBackupTimestamp = (backupKey: string) => {
+    if (backupKey.startsWith(KV_BACKUP_PREFIX)) return backupKey.replace(KV_BACKUP_PREFIX, '');
+    if (backupKey.startsWith(KV_LEGACY_BACKUP_PREFIX)) return backupKey.replace(KV_LEGACY_BACKUP_PREFIX, '');
+    return backupKey;
+};
+
+const getBackupApiVersion = (backupKey: string) => (
+    backupKey.startsWith(KV_BACKUP_PREFIX) ? SYNC_API_VERSION : 'legacy'
+);
+
+const loadCurrentData = async (env: Env): Promise<YNavSyncData | null> => {
+    const v1 = await env.YNAV_KV.get(KV_MAIN_DATA_KEY, 'json') as YNavSyncData | null;
+    if (v1) return v1;
+    const legacy = await env.YNAV_KV.get(KV_LEGACY_MAIN_DATA_KEY, 'json') as YNavSyncData | null;
+    return legacy;
+};
 
 // 辅助函数：验证密码
 const isAuthenticated = (request: Request, env: Env): boolean => {
@@ -68,11 +96,12 @@ async function handleGet(request: Request, env: Env): Promise<Response> {
     }
 
     try {
-        const data = await env.YNAV_KV.get(KV_MAIN_DATA_KEY, 'json');
+        const data = await loadCurrentData(env);
 
         if (!data) {
             return new Response(JSON.stringify({
                 success: true,
+                apiVersion: SYNC_API_VERSION,
                 data: null,
                 message: '云端暂无数据'
             }), {
@@ -82,6 +111,7 @@ async function handleGet(request: Request, env: Env): Promise<Response> {
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             data
         }), {
             headers: { 'Content-Type': 'application/json' }
@@ -124,7 +154,7 @@ async function handlePost(request: Request, env: Env): Promise<Response> {
         }
 
         // 获取当前云端数据进行版本校验
-        const existingData = await env.YNAV_KV.get(KV_MAIN_DATA_KEY, 'json') as YNavSyncData | null;
+        const existingData = await loadCurrentData(env);
 
         // 如果云端有数据且客户端提供了期望版本号，进行冲突检测
         if (existingData && body.expectedVersion !== undefined) {
@@ -158,6 +188,7 @@ async function handlePost(request: Request, env: Env): Promise<Response> {
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             data: dataToSave,
             message: '同步成功'
         }), {
@@ -210,6 +241,7 @@ async function handleBackup(request: Request, env: Env): Promise<Response> {
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             backupKey,
             message: `备份成功: ${backupKey}`
         }), {
@@ -240,9 +272,10 @@ async function handleRestoreBackup(request: Request, env: Env): Promise<Response
         const body = await request.json() as { backupKey?: string; deviceId?: string };
         const backupKey = body.backupKey;
 
-        if (!backupKey || !backupKey.startsWith(KV_BACKUP_PREFIX)) {
+        if (!backupKey || !isBackupKeyValid(backupKey)) {
             return new Response(JSON.stringify({
                 success: false,
+                apiVersion: SYNC_API_VERSION,
                 error: '无效的备份 key'
             }), {
                 status: 400,
@@ -254,6 +287,7 @@ async function handleRestoreBackup(request: Request, env: Env): Promise<Response
         if (!backupData) {
             return new Response(JSON.stringify({
                 success: false,
+                apiVersion: SYNC_API_VERSION,
                 error: '备份不存在或已过期'
             }), {
                 status: 404,
@@ -261,7 +295,7 @@ async function handleRestoreBackup(request: Request, env: Env): Promise<Response
             });
         }
 
-        const existingData = await env.YNAV_KV.get(KV_MAIN_DATA_KEY, 'json') as YNavSyncData | null;
+        const existingData = await loadCurrentData(env);
         const now = Date.now();
         let rollbackKey: string | null = null;
 
@@ -296,6 +330,7 @@ async function handleRestoreBackup(request: Request, env: Env): Promise<Response
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             data: restoredData,
             rollbackKey
         }), {
@@ -323,31 +358,42 @@ async function handleListBackups(request: Request, env: Env): Promise<Response> 
     }
 
     try {
-        const list = await env.YNAV_KV.list({ prefix: KV_BACKUP_PREFIX });
+        const [v1List, legacyList] = await Promise.all([
+            env.YNAV_KV.list({ prefix: KV_BACKUP_PREFIX }),
+            env.YNAV_KV.list({ prefix: KV_LEGACY_BACKUP_PREFIX })
+        ]);
+        // KV list() prefix matching means legacy prefix also matches v1 keys; filter to avoid duplicates.
+        const legacyOnlyKeys = legacyList.keys.filter(k => !k.name.startsWith(KV_BACKUP_PREFIX));
+        const keys = [...v1List.keys, ...legacyOnlyKeys];
 
-        const backups = await Promise.all(list.keys.map(async (key: { name: string; expiration?: number }) => {
+        const backups = await Promise.all(keys.map(async (key: { name: string; expiration?: number }) => {
             let meta: SyncMetadata | null = null;
+            let schemaVersion: number | undefined;
             try {
                 const data = await env.YNAV_KV.get(key.name, 'json') as YNavSyncData | null;
                 meta = data?.meta || null;
+                schemaVersion = data?.schemaVersion;
             } catch {
                 meta = null;
             }
 
             return {
                 key: key.name,
-                timestamp: key.name.replace(KV_BACKUP_PREFIX, ''),
+                apiVersion: getBackupApiVersion(key.name),
+                timestamp: getBackupTimestamp(key.name),
                 expiration: key.expiration,
                 deviceId: meta?.deviceId,
                 updatedAt: meta?.updatedAt,
                 version: meta?.version,
                 browser: meta?.browser,
-                os: meta?.os
+                os: meta?.os,
+                schemaVersion
             };
         }));
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             backups
         }), {
             headers: { 'Content-Type': 'application/json' }
@@ -377,9 +423,10 @@ async function handleDeleteBackup(request: Request, env: Env): Promise<Response>
         const body = await request.json() as { backupKey?: string };
         const backupKey = body.backupKey;
 
-        if (!backupKey || !backupKey.startsWith(KV_BACKUP_PREFIX)) {
+        if (!backupKey || !isBackupKeyValid(backupKey)) {
             return new Response(JSON.stringify({
                 success: false,
+                apiVersion: SYNC_API_VERSION,
                 error: '无效的备份 key'
             }), {
                 status: 400,
@@ -392,6 +439,7 @@ async function handleDeleteBackup(request: Request, env: Env): Promise<Response>
         if (!backupData) {
             return new Response(JSON.stringify({
                 success: false,
+                apiVersion: SYNC_API_VERSION,
                 error: '备份不存在或已过期'
             }), {
                 status: 404,
@@ -404,6 +452,7 @@ async function handleDeleteBackup(request: Request, env: Env): Promise<Response>
 
         return new Response(JSON.stringify({
             success: true,
+            apiVersion: SYNC_API_VERSION,
             message: '备份已删除'
         }), {
             headers: { 'Content-Type': 'application/json' }
