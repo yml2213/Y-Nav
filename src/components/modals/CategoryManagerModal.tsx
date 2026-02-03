@@ -11,6 +11,7 @@ interface CategoryManagerModalProps {
   categories: Category[];
   onUpdateCategories: (newCategories: Category[]) => void;
   onDeleteCategory: (id: string) => void;
+  onDeleteCategories?: (ids: string[]) => void;
   closeOnBackdrop?: boolean;
 }
 
@@ -20,6 +21,7 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
   categories,
   onUpdateCategories,
   onDeleteCategory,
+  onDeleteCategories,
   closeOnBackdrop = true
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -98,7 +100,11 @@ const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
 
     if (!shouldDelete) return;
 
-    selectedCategories.forEach(id => onDeleteCategory(id));
+    if (onDeleteCategories) {
+      onDeleteCategories(Array.from(selectedCategories));
+    } else {
+      selectedCategories.forEach(id => onDeleteCategory(id));
+    }
     setSelectedCategories(new Set());
     setIsBatchMode(false);
   };

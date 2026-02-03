@@ -33,6 +33,27 @@ const getFolderLabel = (path?: string[]) => {
     return path.join(' / ');
 };
 
+const normalizeUrlForCompare = (input: string) => {
+    const raw = (input || '').trim();
+    if (!raw) return '';
+    const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(raw);
+    const withScheme = hasScheme ? raw : `https://${raw}`;
+    try {
+        const url = new URL(withScheme);
+        url.hash = '';
+        url.hostname = url.hostname.toLowerCase();
+        if ((url.protocol === 'http:' && url.port === '80') || (url.protocol === 'https:' && url.port === '443')) {
+            url.port = '';
+        }
+        if (url.pathname !== '/' && url.pathname.endsWith('/')) {
+            url.pathname = url.pathname.replace(/\/+$/, '');
+        }
+        return url.toString();
+    } catch {
+        return raw.replace(/\/+$/, '');
+    }
+};
+
 const ImportModal: React.FC<ImportModalProps> = ({
     isOpen,
     onClose,
@@ -211,10 +232,10 @@ const ImportModal: React.FC<ImportModalProps> = ({
             }
 
             // 2. Diff Logic
-            const existingUrls = new Set(existingLinks.map(l => l.url.trim().replace(/\/$/, ''))); // Normalize URLs slightly
+            const existingUrls = new Set(existingLinks.map(l => normalizeUrlForCompare(l.url))); // Normalize URLs for stable dedupe
 
             const parsedWithDuplicates = result.links.map(link => {
-                const normalizedUrl = link.url.trim().replace(/\/$/, '');
+                const normalizedUrl = normalizeUrlForCompare(link.url);
                 return {
                     ...link,
                     isDuplicate: existingUrls.has(normalizedUrl)
@@ -417,7 +438,19 @@ const ImportModal: React.FC<ImportModalProps> = ({
                             {newLinksCount === 0 && (
                                 <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg text-sm">
                                     <AlertCircle size={16} />
-                                    <span>{isFolderSelectionEmpty ? '未选择任何文件夹。' : '未发现新链接，所有链接已存在。'}</span>
+                                    <span>
+                                        {isFolderSelectionEmpty
+                                            ? '未选择任何文件夹。'
+                                            : (selectedLinks.length === 0
+                                                ? '未发现可导入的链接。'
+                                                : '未发现新链接，所有链接已存在。')}
+                                    </span>
+                                </div>
+                            )}
+
+                            {newLinksCount === 0 && duplicateCount > 0 && (
+                                <div className="text-xs text-slate-500 dark:text-slate-400">
+                                    提示：删除分类不会删除书签，书签会被移动到其他分类；可在“全部/常用推荐”中检查并批量删除后再导入。
                                 </div>
                             )}
 

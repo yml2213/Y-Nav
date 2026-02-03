@@ -262,6 +262,21 @@ export const useDataStore = () => {
         updateData(newLinks, newCats);
     }, [links, categories, updateData]);
 
+    const deleteCategories = useCallback((catIds: string[]) => {
+        const toDelete = new Set(catIds);
+        if (toDelete.size === 0) return;
+
+        const newCats = categories.filter(c => !toDelete.has(c.id));
+        if (newCats.length <= 0) {
+            notify('至少保留一个分类', 'warning');
+            return;
+        }
+
+        const fallbackCategory = newCats.find(c => c.id === 'common') || newCats[0];
+        const newLinks = links.map(l => toDelete.has(l.categoryId) ? { ...l, categoryId: fallbackCategory.id } : l);
+        updateData(newLinks, newCats);
+    }, [links, categories, updateData, notify]);
+
     const importData = useCallback((newLinks: LinkItem[], newCategories: Category[]) => {
         const mergedCategories = [...categories];
         newCategories.forEach(nc => {
@@ -287,6 +302,7 @@ export const useDataStore = () => {
         reorderLinks,
         reorderPinnedLinks,
         deleteCategory,
+        deleteCategories,
         importData
     };
 };

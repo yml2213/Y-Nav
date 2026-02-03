@@ -59,6 +59,7 @@ function App() {
     reorderLinks,
     reorderPinnedLinks,
     deleteCategory: deleteCategoryStore,
+    deleteCategories: deleteCategoriesStore,
     importData,
     isLoaded
   } = useDataStore();
@@ -715,6 +716,10 @@ function App() {
     deleteCategoryStore(catId);
   };
 
+  const handleDeleteCategories = (catIds: string[]) => {
+    deleteCategoriesStore(catIds);
+  };
+
   const handleTogglePrivacyGroup = useCallback((enabled: boolean) => {
     setPrivacyGroupEnabled(enabled);
     localStorage.setItem(PRIVACY_GROUP_ENABLED_KEY, enabled ? '1' : '0');
@@ -1042,6 +1047,7 @@ function App() {
           categories={categories}
           onUpdateCategories={handleUpdateCategories}
           onDeleteCategory={handleDeleteCategory}
+          onDeleteCategories={handleDeleteCategories}
           closeOnBackdrop={closeOnBackdrop}
         />
 

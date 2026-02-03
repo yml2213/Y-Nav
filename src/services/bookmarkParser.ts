@@ -26,36 +26,40 @@ export const parseBookmarks = async (file: File): Promise<ImportResult> => {
 
   const links: ParsedBookmarkLink[] = [];
   const categories: Category[] = [];
-  const categoryMap = new Map<string, string>(); // Name -> ID
+  const categoryMap = new Map<string, { id: string; name: string }>(); // PathKey -> {id, name}
   const genericRootFolders = new Set(['Bookmarks Bar', '书签栏', 'Other Bookmarks', '其他书签']);
 
-  const normalizeCategoryName = (path: string[]) => {
-    if (path.length === 0) return 'common';
-    const last = path[path.length - 1].trim();
-    if (!last) return 'common';
-    if (path.length === 1 && genericRootFolders.has(last)) {
-      return 'common';
+  const normalizeFolderPath = (path: string[]) => {
+    const trimmed = path.map(seg => seg.trim()).filter(Boolean);
+    // Strip generic root folders like "Bookmarks Bar" / "Other Bookmarks"
+    while (trimmed.length > 0 && genericRootFolders.has(trimmed[0])) {
+      trimmed.shift();
     }
-    return last;
+    return trimmed;
   };
 
-  // Helper to get or create category ID
-  const getCategoryId = (name: string): string => {
+  const getCategoryNameFromPath = (path: string[]) => {
+    if (path.length === 0) return 'common';
+    return path.join(' / ');
+  };
+
+  // Helper to get or create category ID (categories in Y-Nav are flat, so we use full folder path to avoid collisions)
+  const getCategoryIdByFolderPath = (folderPath: string[]): string => {
+    const normalizedPath = normalizeFolderPath(folderPath);
+    const name = getCategoryNameFromPath(normalizedPath);
     if (!name || name === 'common') return 'common';
 
-    if (categoryMap.has(name)) {
-      return categoryMap.get(name)!;
-    }
-    
-    // Check existing default categories could be mapped here if we had access, 
-    // but for now we create new ones.
+    const key = JSON.stringify(normalizedPath);
+    const existing = categoryMap.get(key);
+    if (existing) return existing.id;
+
     const newId = generateId();
     categories.push({
       id: newId,
-      name: name,
-      icon: 'Folder' // Default icon for imported folders
+      name,
+      icon: 'Folder'
     });
-    categoryMap.set(name, newId);
+    categoryMap.set(key, { id: newId, name });
     return newId;
   };
 
@@ -90,7 +94,7 @@ export const parseBookmarks = async (file: File): Promise<ImportResult> => {
                     id: generateId(),
                     title: title,
                     url: url,
-                    categoryId: getCategoryId(normalizeCategoryName(folderPath)),
+                    categoryId: getCategoryIdByFolderPath(folderPath),
                     createdAt: Date.now(),
                     icon: a.getAttribute('icon') || undefined,
                     folderPath
