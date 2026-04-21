@@ -1,39 +1,18 @@
 # ============================================
-# Y-Nav Cloudflare Workers 部署配置
+# Y-Nav EdgeOne Pages 部署配置
 # ============================================
-# 此配置用于将 Y-Nav 部署为 Cloudflare Worker
-# 支持自定义域名 + 优选 IP 实现国内加速
+# 注意：EdgeOne Pages 会自动识别 functions/ 目录，无需指定 main 入口
 # ============================================
 
-name = "y-nav"
-main = "worker/index.ts"
+name = "y-nav-edgeone"
 compatibility_date = "2024-01-01"
 
-# 静态资源目录 (Workers Sites)
-[site]
-bucket = "./dist"
+# 核心修复：变量名必须与代码中的 env.YNAV_KV 一致
+# 之前你提供的配置写成了 YNAV_WORKER_KV，这就是报错的原因！
 
-# KV 命名空间绑定 (Workers 专用，与 Pages 的 YNAV_KV 区分)
-# 若需创建新的 KV: wrangler kv:namespace create YNAV_WORKER_KV
-[[kv_namespaces]]
-binding = "YNAV_WORKER_KV"
-id = "65af0541820e42438959ed8fc8688f0c"
-# preview_id = ""  # 本地预览时使用的 KV ID (可选)
+binding = "YNAV_KV"
+id = "ns-ghZ7HB6T3ptW"
 
-# 环境变量 (也可以在 Cloudflare Dashboard 中设置)
-[vars]
-# SYNC_PASSWORD = ""  # 同步密码，建议在 Dashboard 中设置而非此处
-
-# 生产环境配置 (可选)
-# [env.production]
-# routes = [
-#   { pattern = "your-domain.com/*", zone_name = "your-domain.com" }
-# ]
-
-# ============================================
-# 部署步骤:
-# 1. npm run build
-# 2. wrangler kv:namespace create YNAV_WORKER_KV
-# 3. 将返回的 id 填入上方 kv_namespaces.id
-# 4. wrangler deploy
-# ============================================
+# 环境变量建议依然在 EdgeOne 控制台设置，这里仅作示例（敏感信息不要提交到公开仓库）
+# [vars]
+# SYNC_PASSWORD = "your_password_here"
