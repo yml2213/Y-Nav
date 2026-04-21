@@ -37,3 +37,21 @@ id = "65af0541820e42438959ed8fc8688f0c"
 # 3. 将返回的 id 填入上方 kv_namespaces.id
 # 4. wrangler deploy
 # ============================================
+# ============================================
+# Y-Nav EdgeOne Pages 部署配置
+# ============================================
+# 注意：EdgeOne Pages 会自动识别 functions/ 目录，无需指定 main 入口
+# ============================================
+
+name = "y-nav-edgeone"
+compatibility_date = "2024-01-01"
+
+# 核心修复：变量名必须与代码中的 env.YNAV_KV 一致
+# 之前你提供的配置写成了 YNAV_WORKER_KV，这就是报错的原因！
+
+binding = "YNAV_KV"
+id = "ns-ghZ7HB6T3ptW"
+
+# 环境变量建议依然在 EdgeOne 控制台设置，这里仅作示例（敏感信息不要提交到公开仓库）
+# [vars]
+# SYNC_PASSWORD = "your_password_here"
